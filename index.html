@@ -1,0 +1,1423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jingu Dynamics — Custom Software & AI Agents for Local Businesses</title>
+  <meta name="description" content="Jingu Dynamics is a Toronto-based software automation agency building custom tools and AI agents for the businesses that power your neighborhood.">
+
+  <!-- Open Graph tags for link sharing -->
+  <meta property="og:title" content="Jingu Dynamics — Custom Software & AI Agents">
+  <meta property="og:description" content="Custom software and AI automation for local businesses. Based in Toronto.">
+  <meta property="og:type" content="website">
+
+  <!-- INSERT: Analytics tracking (GA4 or similar) here -->
+
+  <!-- Google Fonts: Syne (geometric display face) — single family to minimize load -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <noscript>
+    <style>.js-only { display: none !important; }</style>
+  </noscript>
+
+  <style>
+    /* ============================================
+       CSS CUSTOM PROPERTIES
+       ============================================ */
+    :root {
+      --bg-primary: #0a0a0a;
+      --bg-secondary: #111111;
+      --bg-card: #161616;
+      --bg-card-hover: #1c1c1c;
+      --gold: #d4a843;
+      --gold-bright: #f0c850;
+      --gold-dim: #a8862f;
+      --crimson: #8b1a1a;
+      --crimson-bright: #c0392b;
+      --text-primary: #ffffff;
+      --text-body: #e8e8e8;
+      --text-secondary: #999999;
+      --text-tertiary: #666666;
+      --border-subtle: rgba(212, 168, 67, 0.12);
+      --border-gold: rgba(212, 168, 67, 0.3);
+      --font-display: 'Syne', sans-serif;
+      --font-body: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+      --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+      --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
+    }
+
+    /* ============================================
+       RESET & BASE
+       ============================================ */
+    *, *::before, *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      -webkit-text-size-adjust: 100%;
+    }
+
+    body {
+      font-family: var(--font-body);
+      background-color: var(--bg-primary);
+      color: var(--text-body);
+      line-height: 1.6;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    img, svg {
+      display: block;
+      max-width: 100%;
+    }
+
+    button, input, textarea {
+      font: inherit;
+      color: inherit;
+      border: none;
+      background: none;
+    }
+
+    /* ============================================
+       FOCUS STATES (Accessibility)
+       ============================================ */
+    :focus-visible {
+      outline: 2px solid var(--gold);
+      outline-offset: 3px;
+    }
+
+    a:focus-visible,
+    button:focus-visible {
+      outline: 2px solid var(--gold);
+      outline-offset: 3px;
+    }
+
+    /* ============================================
+       UTILITY
+       ============================================ */
+    .container {
+      width: 100%;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    /* ============================================
+       BACKGROUND TEXTURE — subtle noise overlay
+       ============================================ */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      opacity: 0.03;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      background-size: 256px 256px;
+    }
+
+    /* ============================================
+       NAVIGATION
+       ============================================ */
+    .nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      padding: 0 24px;
+      transition: background-color 0.4s ease, backdrop-filter 0.4s ease;
+    }
+
+    .nav.scrolled {
+      background-color: rgba(10, 10, 10, 0.92);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+    }
+
+    .nav.scrolled .nav__inner {
+      border-bottom-color: var(--border-subtle);
+    }
+
+    .nav__inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 72px;
+      border-bottom: 1px solid transparent;
+      transition: border-color 0.4s ease;
+    }
+
+    .nav__logo {
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: 1.25rem;
+      letter-spacing: -0.02em;
+      color: var(--text-primary);
+      position: relative;
+      z-index: 1001;
+    }
+
+    .nav__logo span {
+      color: var(--gold);
+    }
+
+    .nav__links {
+      display: flex;
+      align-items: center;
+      gap: 36px;
+      list-style: none;
+    }
+
+    .nav__links a {
+      font-size: 0.875rem;
+      font-weight: 500;
+      letter-spacing: 0.02em;
+      color: var(--text-secondary);
+      transition: color 0.25s ease;
+      position: relative;
+    }
+
+    .nav__links a::after {
+      content: '';
+      position: absolute;
+      bottom: -4px;
+      left: 0;
+      width: 0;
+      height: 1px;
+      background: var(--gold);
+      transition: width 0.3s var(--ease-out-expo);
+    }
+
+    .nav__links a:hover {
+      color: var(--gold);
+    }
+
+    .nav__links a:hover::after {
+      width: 100%;
+    }
+
+    /* Hamburger */
+    .nav__hamburger {
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      width: 40px;
+      height: 40px;
+      cursor: pointer;
+      z-index: 1001;
+      background: none;
+      border: none;
+    }
+
+    .nav__hamburger span {
+      display: block;
+      width: 22px;
+      height: 1.5px;
+      background: var(--text-body);
+      transition: transform 0.3s var(--ease-out-expo), opacity 0.2s ease;
+    }
+
+    .nav__hamburger span:nth-child(1) { margin-bottom: 6px; }
+    .nav__hamburger span:nth-child(3) { margin-top: 6px; }
+
+    .nav__hamburger.active span:nth-child(1) {
+      transform: translateY(7.5px) rotate(45deg);
+    }
+    .nav__hamburger.active span:nth-child(2) {
+      opacity: 0;
+    }
+    .nav__hamburger.active span:nth-child(3) {
+      transform: translateY(-7.5px) rotate(-45deg);
+    }
+
+    /* Mobile nav overlay */
+    .nav__mobile {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(10, 10, 10, 0.98);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      z-index: 999;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 40px;
+      opacity: 0;
+      transition: opacity 0.35s ease;
+    }
+
+    .nav__mobile.open {
+      display: flex;
+      opacity: 1;
+    }
+
+    .nav__mobile a {
+      font-family: var(--font-display);
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: var(--text-body);
+      letter-spacing: -0.01em;
+      transition: color 0.2s ease;
+    }
+
+    .nav__mobile a:hover {
+      color: var(--gold);
+    }
+
+    @media (max-width: 768px) {
+      .nav__links { display: none; }
+      .nav__hamburger { display: flex; }
+    }
+
+    /* ============================================
+       HERO
+       ============================================ */
+    .hero {
+      position: relative;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      overflow: hidden;
+    }
+
+    /* Radial gold glow behind hero */
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: -20%;
+      right: -10%;
+      width: 800px;
+      height: 800px;
+      background: radial-gradient(circle, rgba(212, 168, 67, 0.06) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    /* Crimson accent glow — bottom-left, very faint */
+    .hero::after {
+      content: '';
+      position: absolute;
+      bottom: -30%;
+      left: -15%;
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(139, 26, 26, 0.05) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    /* Angular geometric accent — top-right corner */
+    .hero__geo {
+      position: absolute;
+      top: 72px;
+      right: 0;
+      width: 400px;
+      height: 400px;
+      pointer-events: none;
+      opacity: 0.06;
+    }
+
+    .hero__geo::before {
+      content: '';
+      position: absolute;
+      top: 40px;
+      right: 60px;
+      width: 200px;
+      height: 200px;
+      border: 1px solid var(--gold);
+      transform: rotate(45deg);
+    }
+
+    .hero__geo::after {
+      content: '';
+      position: absolute;
+      top: 80px;
+      right: 100px;
+      width: 120px;
+      height: 120px;
+      border: 1px solid var(--gold);
+      transform: rotate(45deg);
+    }
+
+    .hero__content {
+      position: relative;
+      z-index: 1;
+      max-width: 780px;
+    }
+
+    /* Thin gold staff-like accent line above headline */
+    .hero__accent {
+      display: block;
+      width: 64px;
+      height: 2px;
+      background: linear-gradient(90deg, var(--gold), var(--gold-dim));
+      margin-bottom: 32px;
+      border-radius: 1px;
+    }
+
+    .hero__title {
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: clamp(2.8rem, 7vw, 5.5rem);
+      line-height: 1.05;
+      letter-spacing: -0.03em;
+      color: var(--text-primary);
+      margin-bottom: 24px;
+    }
+
+    .hero__title span {
+      display: inline;
+      background: linear-gradient(135deg, var(--gold-bright), var(--gold), var(--gold-dim));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero__subtitle {
+      font-family: var(--font-display);
+      font-weight: 500;
+      font-size: clamp(1.1rem, 2.5vw, 1.5rem);
+      line-height: 1.45;
+      color: var(--text-body);
+      margin-bottom: 16px;
+      max-width: 620px;
+    }
+
+    .hero__supporting {
+      font-size: 1rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      margin-bottom: 40px;
+      max-width: 540px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-family: var(--font-display);
+      font-weight: 600;
+      font-size: 0.95rem;
+      letter-spacing: 0.01em;
+      padding: 16px 36px;
+      border: 1px solid var(--gold);
+      color: var(--bg-primary);
+      background: var(--gold);
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      transition: background 0.35s ease, color 0.35s ease, box-shadow 0.35s ease, transform 0.2s ease;
+    }
+
+    .btn:hover {
+      background: transparent;
+      color: var(--gold);
+      box-shadow: 0 0 30px rgba(212, 168, 67, 0.15);
+    }
+
+    .btn:active {
+      transform: scale(0.98);
+    }
+
+    .btn--outline {
+      background: transparent;
+      color: var(--gold);
+    }
+
+    .btn--outline:hover {
+      background: var(--gold);
+      color: var(--bg-primary);
+    }
+
+    .btn__arrow {
+      transition: transform 0.3s var(--ease-out-expo);
+    }
+
+    .btn:hover .btn__arrow {
+      transform: translateX(4px);
+    }
+
+    /* ============================================
+       ANGULAR DIVIDER
+       ============================================ */
+    .divider {
+      width: 100%;
+      height: 80px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .divider::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 160px;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--gold-dim), transparent);
+    }
+
+    /* Small diamond at center */
+    .divider::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) rotate(45deg);
+      width: 6px;
+      height: 6px;
+      border: 1px solid var(--gold-dim);
+    }
+
+    /* ============================================
+       SECTION SHARED
+       ============================================ */
+    .section {
+      padding: 100px 0;
+      position: relative;
+    }
+
+    .section__label {
+      font-family: var(--font-display);
+      font-weight: 600;
+      font-size: 0.75rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 16px;
+    }
+
+    .section__title {
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: clamp(2rem, 4vw, 3rem);
+      line-height: 1.1;
+      letter-spacing: -0.02em;
+      color: var(--text-primary);
+      margin-bottom: 20px;
+    }
+
+    .section__desc {
+      font-size: 1.05rem;
+      line-height: 1.65;
+      color: var(--text-secondary);
+      max-width: 560px;
+    }
+
+    /* ============================================
+       SERVICES GRID
+       ============================================ */
+    .services-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+      margin-top: 56px;
+    }
+
+    @media (max-width: 900px) {
+      .services-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+      }
+    }
+
+    .service-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      padding: 40px 32px;
+      position: relative;
+      overflow: hidden;
+      transition: border-color 0.35s ease, background 0.35s ease, transform 0.3s var(--ease-out-expo);
+    }
+
+    .service-card:hover {
+      border-color: var(--border-gold);
+      background: var(--bg-card-hover);
+      transform: translateY(-4px);
+    }
+
+    /* Top-left gold corner accent */
+    .service-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 40px;
+      height: 1px;
+      background: var(--gold);
+      transition: width 0.4s var(--ease-out-expo);
+    }
+
+    .service-card::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 1px;
+      height: 40px;
+      background: var(--gold);
+      transition: height 0.4s var(--ease-out-expo);
+    }
+
+    .service-card:hover::before { width: 60px; }
+    .service-card:hover::after { height: 60px; }
+
+    .service-card__icon {
+      width: 48px;
+      height: 48px;
+      margin-bottom: 24px;
+      color: var(--gold);
+    }
+
+    .service-card__title {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 1.2rem;
+      color: var(--text-primary);
+      margin-bottom: 12px;
+      letter-spacing: -0.01em;
+    }
+
+    .service-card__desc {
+      font-size: 0.925rem;
+      line-height: 1.65;
+      color: var(--text-secondary);
+    }
+
+    /* ============================================
+       PRODUCTS — PING-YOU
+       ============================================ */
+    .products {
+      background: var(--bg-secondary);
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Faint mist-like gradient overlay */
+    .products::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 200px;
+      background: linear-gradient(180deg, rgba(212, 168, 67, 0.02) 0%, transparent 100%);
+      pointer-events: none;
+    }
+
+    .products__layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 64px;
+      align-items: start;
+      margin-top: 48px;
+    }
+
+    @media (max-width: 900px) {
+      .products__layout {
+        grid-template-columns: 1fr;
+        gap: 40px;
+      }
+    }
+
+    .products__copy {}
+
+    .products__tagline {
+      font-family: var(--font-display);
+      font-weight: 600;
+      font-size: 1.3rem;
+      color: var(--text-body);
+      margin-bottom: 20px;
+      line-height: 1.4;
+    }
+
+    .products__desc {
+      font-size: 1rem;
+      line-height: 1.7;
+      color: var(--text-secondary);
+      margin-bottom: 32px;
+    }
+
+    .products__cta {
+      margin-top: 8px;
+    }
+
+    .products__features {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .products__features li {
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+      font-size: 0.95rem;
+      line-height: 1.55;
+      color: var(--text-body);
+    }
+
+    .feature-icon {
+      flex-shrink: 0;
+      width: 24px;
+      height: 24px;
+      color: var(--gold);
+      margin-top: 1px;
+    }
+
+    /* ============================================
+       CONTACT
+       ============================================ */
+    .contact {
+      position: relative;
+    }
+
+    .contact__layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 64px;
+      align-items: start;
+      margin-top: 48px;
+    }
+
+    @media (max-width: 900px) {
+      .contact__layout {
+        grid-template-columns: 1fr;
+        gap: 40px;
+      }
+    }
+
+    .contact__info {
+      padding-top: 8px;
+    }
+
+    .contact__text {
+      font-size: 1.05rem;
+      line-height: 1.65;
+      color: var(--text-secondary);
+      margin-bottom: 32px;
+      max-width: 440px;
+    }
+
+    .contact__email {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-family: var(--font-display);
+      font-weight: 600;
+      font-size: 1rem;
+      color: var(--gold);
+      transition: color 0.2s ease;
+    }
+
+    .contact__email:hover {
+      color: var(--gold-bright);
+    }
+
+    .contact__email svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    /* Form */
+    .form {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .form__group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .form__label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--text-tertiary);
+    }
+
+    .form__input,
+    .form__textarea {
+      width: 100%;
+      padding: 14px 18px;
+      font-size: 0.95rem;
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-body);
+      transition: border-color 0.25s ease, box-shadow 0.25s ease;
+    }
+
+    .form__input:focus,
+    .form__textarea:focus {
+      outline: none;
+      border-color: var(--gold);
+      box-shadow: 0 0 0 3px rgba(212, 168, 67, 0.1);
+    }
+
+    .form__input::placeholder,
+    .form__textarea::placeholder {
+      color: var(--text-tertiary);
+    }
+
+    .form__textarea {
+      min-height: 140px;
+      resize: vertical;
+    }
+
+    .form__optional {
+      font-weight: 400;
+      color: var(--text-tertiary);
+      text-transform: none;
+      letter-spacing: 0;
+      font-size: 0.75rem;
+    }
+
+    .form__submit {
+      align-self: flex-start;
+      margin-top: 4px;
+    }
+
+    /* ============================================
+       FOOTER & COMPLIANCE
+       ============================================ */
+    .footer {
+      background: var(--bg-secondary);
+      border-top: 1px solid var(--border-subtle);
+      padding: 64px 0 40px;
+    }
+
+    .footer__top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 40px;
+      flex-wrap: wrap;
+      margin-bottom: 48px;
+    }
+
+    .footer__brand {
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: 1.1rem;
+      color: var(--text-primary);
+      margin-bottom: 16px;
+    }
+
+    .footer__brand span {
+      color: var(--gold);
+    }
+
+    /* REPLACE: Update this address when you have a physical office/mailing address */
+    .footer__address {
+      font-size: 0.875rem;
+      line-height: 1.7;
+      color: var(--text-secondary);
+    }
+
+    .footer__address a {
+      color: var(--gold);
+      transition: color 0.2s ease;
+    }
+
+    .footer__address a:hover {
+      color: var(--gold-bright);
+    }
+
+    .footer__nav {
+      display: flex;
+      gap: 32px;
+      list-style: none;
+    }
+
+    .footer__nav a {
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+      transition: color 0.2s ease;
+    }
+
+    .footer__nav a:hover {
+      color: var(--gold);
+    }
+
+    @media (max-width: 600px) {
+      .footer__top {
+        flex-direction: column;
+      }
+      .footer__nav {
+        flex-wrap: wrap;
+        gap: 16px 24px;
+      }
+    }
+
+    /* ============================================
+       PRIVACY POLICY & SMS TERMS (A2P 10DLC)
+       IMPORTANT: This section's anchor ID is required
+       for Twilio/TCR A2P campaign registration.
+       The URL jingudynamics.com/#privacy-policy must
+       resolve to this section.
+       ============================================ */
+    .privacy {
+      border: 1px solid var(--border-gold);
+      background: rgba(22, 22, 22, 0.8);
+      padding: 40px 36px;
+      margin-bottom: 48px;
+      position: relative;
+    }
+
+    /* Gold corner accents */
+    .privacy::before {
+      content: '';
+      position: absolute;
+      top: -1px;
+      left: -1px;
+      width: 24px;
+      height: 24px;
+      border-top: 2px solid var(--gold);
+      border-left: 2px solid var(--gold);
+    }
+
+    .privacy::after {
+      content: '';
+      position: absolute;
+      bottom: -1px;
+      right: -1px;
+      width: 24px;
+      height: 24px;
+      border-bottom: 2px solid var(--gold);
+      border-right: 2px solid var(--gold);
+    }
+
+    .privacy__title {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 1.25rem;
+      color: var(--text-primary);
+      margin-bottom: 28px;
+      letter-spacing: -0.01em;
+    }
+
+    .privacy__subtitle {
+      font-family: var(--font-display);
+      font-weight: 600;
+      font-size: 0.95rem;
+      color: var(--gold);
+      margin-bottom: 10px;
+      margin-top: 24px;
+    }
+
+    .privacy__subtitle:first-of-type {
+      margin-top: 0;
+    }
+
+    .privacy__text {
+      font-size: 0.875rem;
+      line-height: 1.75;
+      color: var(--text-secondary);
+    }
+
+    .privacy__text strong {
+      color: var(--text-body);
+      font-weight: 600;
+    }
+
+    /* Footer bottom */
+    .footer__bottom {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+      padding-top: 24px;
+      border-top: 1px solid var(--border-subtle);
+      font-size: 0.8rem;
+      color: var(--text-tertiary);
+    }
+
+    /* ============================================
+       SCROLL REVEAL ANIMATIONS
+       ============================================ */
+    .reveal {
+      opacity: 0;
+      transform: translateY(32px);
+      transition: opacity 0.7s var(--ease-out-quart), transform 0.7s var(--ease-out-quart);
+    }
+
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .reveal-delay-1 { transition-delay: 0.1s; }
+    .reveal-delay-2 { transition-delay: 0.2s; }
+    .reveal-delay-3 { transition-delay: 0.3s; }
+
+    /* Hero stagger */
+    .hero .reveal-delay-1 { transition-delay: 0.15s; }
+    .hero .reveal-delay-2 { transition-delay: 0.3s; }
+    .hero .reveal-delay-3 { transition-delay: 0.45s; }
+    .hero .reveal-delay-4 { transition-delay: 0.6s; }
+
+    /* ============================================
+       RESPONSIVE REFINEMENTS
+       ============================================ */
+    @media (max-width: 600px) {
+      .section {
+        padding: 72px 0;
+      }
+
+      .hero {
+        min-height: calc(100vh - 72px);
+        padding-top: 72px;
+      }
+
+      .hero__geo {
+        width: 200px;
+        height: 200px;
+      }
+
+      .hero__geo::before {
+        width: 100px;
+        height: 100px;
+        top: 20px;
+        right: 20px;
+      }
+
+      .hero__geo::after {
+        width: 60px;
+        height: 60px;
+        top: 40px;
+        right: 40px;
+      }
+
+      .privacy {
+        padding: 28px 22px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ============================================
+       NAVIGATION
+       ============================================ -->
+  <nav class="nav" role="navigation" aria-label="Main navigation">
+    <div class="nav__inner">
+      <a href="#" class="nav__logo" aria-label="Jingu Dynamics home">Jingu <span>Dynamics</span></a>
+
+      <ul class="nav__links">
+        <li><a href="#services">Services</a></li>
+        <li><a href="#products">Products</a></li>
+        <li><a href="#contact">Contact</a></li>
+        <li><a href="#privacy-policy">Privacy Policy</a></li>
+      </ul>
+
+      <button class="nav__hamburger js-only" aria-label="Toggle navigation menu" aria-expanded="false">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+
+    <div class="nav__mobile" role="dialog" aria-label="Navigation menu">
+      <a href="#services">Services</a>
+      <a href="#products">Products</a>
+      <a href="#contact">Contact</a>
+      <a href="#privacy-policy">Privacy Policy</a>
+    </div>
+  </nav>
+
+  <!-- ============================================
+       HERO
+       ============================================ -->
+  <section class="hero" id="hero">
+    <div class="hero__geo" aria-hidden="true"></div>
+    <div class="container">
+      <div class="hero__content">
+        <span class="hero__accent reveal" aria-hidden="true"></span>
+        <h1 class="hero__title reveal reveal-delay-1">Jingu <span>Dynamics</span></h1>
+        <p class="hero__subtitle reveal reveal-delay-2">Custom software &amp; AI agents for the businesses that power your neighborhood.</p>
+        <p class="hero__supporting reveal reveal-delay-3">We build automation tools that save local businesses time, money, and missed opportunities.</p>
+        <div class="reveal reveal-delay-4">
+          <a href="#contact" class="btn">
+            Get in Touch
+            <svg class="btn__arrow" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+              <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider" aria-hidden="true"></div>
+
+  <!-- ============================================
+       SERVICES
+       ============================================ -->
+  <section class="section" id="services">
+    <div class="container">
+      <p class="section__label reveal">What We Do</p>
+      <h2 class="section__title reveal reveal-delay-1">Services</h2>
+
+      <div class="services-grid">
+        <!-- Custom Software -->
+        <div class="service-card reveal reveal-delay-1">
+          <svg class="service-card__icon" viewBox="0 0 48 48" fill="none" aria-hidden="true">
+            <rect x="6" y="10" width="36" height="24" rx="2" stroke="currentColor" stroke-width="1.5"/>
+            <path d="M6 34h36" stroke="currentColor" stroke-width="1.5"/>
+            <path d="M18 38h12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            <path d="M17 20l-4 4 4 4M31 20l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M26 18l-4 10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+          <h3 class="service-card__title">Custom Software</h3>
+          <p class="service-card__desc">Tailored tools built for your specific workflow. No bloated SaaS, no unnecessary features -- just software that does exactly what you need.</p>
+        </div>
+
+        <!-- AI Automation -->
+        <div class="service-card reveal reveal-delay-2">
+          <svg class="service-card__icon" viewBox="0 0 48 48" fill="none" aria-hidden="true">
+            <circle cx="24" cy="24" r="16" stroke="currentColor" stroke-width="1.5"/>
+            <circle cx="24" cy="24" r="6" stroke="currentColor" stroke-width="1.5"/>
+            <path d="M24 8v4M24 36v4M8 24h4M36 24h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            <path d="M13 13l3 3M32 32l3 3M13 35l3-3M32 16l3-3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+          <h3 class="service-card__title">AI Automation</h3>
+          <p class="service-card__desc">From intelligent call handling to automated follow-ups, we deploy AI agents that work around the clock so you don't have to.</p>
+        </div>
+
+        <!-- Business Intelligence -->
+        <div class="service-card reveal reveal-delay-3">
+          <svg class="service-card__icon" viewBox="0 0 48 48" fill="none" aria-hidden="true">
+            <path d="M10 38V22" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            <path d="M19 38V16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            <path d="M28 38V26" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            <path d="M37 38V12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            <path d="M8 12l8 6 9-8 9 4 8-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.5"/>
+          </svg>
+          <h3 class="service-card__title">Business Intelligence</h3>
+          <p class="service-card__desc">Turn your existing data into actionable insights. Know what's working, what's not, and where the opportunities are.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider" aria-hidden="true"></div>
+
+  <!-- ============================================
+       PRODUCTS — PING-YOU
+       ============================================ -->
+  <section class="section products" id="products">
+    <div class="container">
+      <p class="section__label reveal">Flagship Product</p>
+      <h2 class="section__title reveal reveal-delay-1">Meet Ping-You</h2>
+
+      <div class="products__layout">
+        <div class="products__copy reveal reveal-delay-2">
+          <p class="products__tagline">Your AI receptionist that never misses a call.</p>
+          <p class="products__desc">
+            Ping-You is an AI-powered SMS assistant built for service businesses -- auto detailers, tattoo studios, barbershops, and more. When a customer calls and you can't pick up, Ping-You automatically follows up via text, captures their intent, and keeps the conversation going until you're ready to take over. No missed leads. No phone tag. Just business, handled.
+          </p>
+          <div class="products__cta">
+            <a href="#contact" class="btn btn--outline">
+              Interested? Let's talk.
+              <svg class="btn__arrow" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </a>
+          </div>
+        </div>
+
+        <ul class="products__features reveal reveal-delay-3">
+          <li>
+            <svg class="feature-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Responds to missed calls instantly via SMS
+          </li>
+          <li>
+            <svg class="feature-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.5"/>
+              <path d="M12 6v6l4 2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Captures customer intent and qualifies leads
+          </li>
+          <li>
+            <svg class="feature-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              <circle cx="9" cy="7" r="4" stroke="currentColor" stroke-width="1.5"/>
+              <path d="M22 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            You stay in control -- seamless handoff when you're ready
+          </li>
+          <li>
+            <svg class="feature-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Built for service businesses that run on reputation
+          </li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider" aria-hidden="true"></div>
+
+  <!-- ============================================
+       CONTACT
+       ============================================ -->
+  <section class="section contact" id="contact">
+    <div class="container">
+      <p class="section__label reveal">Get Started</p>
+      <h2 class="section__title reveal reveal-delay-1">Let's Build Something</h2>
+
+      <div class="contact__layout">
+        <div class="contact__info reveal reveal-delay-2">
+          <p class="contact__text">
+            Whether you need a custom tool, want to pilot Ping-You, or just want to talk about what automation could do for your business -- we'd like to hear from you.
+          </p>
+          <a href="mailto:contact@jingudynamics.com" class="contact__email">
+            <svg viewBox="0 0 18 18" fill="none" aria-hidden="true">
+              <rect x="2" y="4" width="14" height="10" rx="1.5" stroke="currentColor" stroke-width="1.2"/>
+              <path d="M2 5.5l7 5 7-5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            contact@jingudynamics.com
+          </a>
+        </div>
+
+        <!--
+          FORM ENDPOINT: Replace the action URL below with your production
+          form handling endpoint (e.g., Formspree, Formsubmit, or your own backend).
+          Current action uses formsubmit.co as a placeholder.
+        -->
+        <form class="form reveal reveal-delay-3" action="https://formsubmit.co/contact@jingudynamics.com" method="POST">
+          <!-- Formsubmit config -->
+          <input type="hidden" name="_subject" value="Inquiry via Jingu Dynamics website">
+          <input type="hidden" name="_captcha" value="false">
+          <input type="text" name="_honey" style="display:none" tabindex="-1" autocomplete="off">
+
+          <div class="form__group">
+            <label class="form__label" for="name">Name</label>
+            <input class="form__input" type="text" id="name" name="name" placeholder="Your name" required>
+          </div>
+
+          <div class="form__group">
+            <label class="form__label" for="email">Email</label>
+            <input class="form__input" type="email" id="email" name="email" placeholder="you@example.com" required>
+          </div>
+
+          <div class="form__group">
+            <label class="form__label" for="phone">Phone <span class="form__optional">(optional)</span></label>
+            <input class="form__input" type="tel" id="phone" name="phone" placeholder="(416) 555-0100">
+          </div>
+
+          <div class="form__group">
+            <label class="form__label" for="message">Message</label>
+            <textarea class="form__textarea" id="message" name="message" placeholder="Tell us about your project or question..." required></textarea>
+          </div>
+
+          <button type="submit" class="btn form__submit">
+            Send Message
+            <svg class="btn__arrow" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+              <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================
+       FOOTER & COMPLIANCE
+       ============================================ -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer__top">
+        <div>
+          <div class="footer__brand">Jingu <span>Dynamics</span></div>
+          <!-- REPLACE: Swap back to "Toronto, ON, Canada" after A2P 10DLC brand registration is approved -->
+          <address class="footer__address">
+            252 Conover Ave<br>
+            Aurora, ON L4G 7W8, Canada<br>
+            <a href="mailto:contact@jingudynamics.com">contact@jingudynamics.com</a>
+          </address>
+        </div>
+        <ul class="footer__nav">
+          <li><a href="#services">Services</a></li>
+          <li><a href="#products">Products</a></li>
+          <li><a href="#contact">Contact</a></li>
+          <li><a href="#privacy-policy">Privacy Policy</a></li>
+        </ul>
+      </div>
+
+      <!--
+        PRIVACY POLICY & SMS CONSENT TERMS (A2P 10DLC Compliance)
+        ==========================================================
+        CRITICAL: This section's anchor ID "privacy-policy" is required for
+        Twilio/TCR A2P 10DLC campaign registration. The URL
+        jingudynamics.com/#privacy-policy MUST resolve to this section.
+        Do NOT remove or rename this ID.
+      -->
+      <div class="privacy" id="privacy-policy">
+        <h2 class="privacy__title">Privacy Policy &amp; SMS Consent Terms</h2>
+
+        <h3 class="privacy__subtitle">SMS Opt-In Disclosure</h3>
+        <p class="privacy__text">
+          Jingu Dynamics operates Ping-You, an AI-powered SMS assistant for local service businesses. End users (customers of our client businesses) may receive text messages from Ping-You only after initiating contact by calling a Ping-You-enabled business. No unsolicited messages are ever sent. By calling a business that uses Ping-You and engaging with the subsequent SMS conversation, you consent to receive text messages related to your inquiry.
+        </p>
+
+        <h3 class="privacy__subtitle">Data Sharing Disclosure</h3>
+        <p class="privacy__text">
+          No mobile information will be shared with third parties/affiliates for marketing/promotional purposes. All other categories exclude text messaging originator opt-in data and consent; this information will not be shared with any third parties.
+        </p>
+
+        <h3 class="privacy__subtitle">Message Frequency &amp; Opt-Out</h3>
+        <p class="privacy__text">
+          Message frequency varies based on your interaction. Message and data rates may apply. Reply STOP at any time to opt out of messages. Reply HELP for assistance.
+        </p>
+
+        <h3 class="privacy__subtitle">Contact for Privacy Inquiries</h3>
+        <p class="privacy__text">
+          For questions regarding this policy or your data, contact us at <a href="mailto:contact@jingudynamics.com" style="color: var(--gold);">contact@jingudynamics.com</a>.
+        </p>
+      </div>
+
+      <div class="footer__bottom">
+        <span>Jingu Dynamics. Toronto, Canada.</span>
+        <span><a href="#privacy-policy" style="color: var(--text-tertiary); transition: color 0.2s;">Privacy Policy</a></span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ============================================
+       JAVASCRIPT
+       ============================================ -->
+  <script>
+    (function() {
+      'use strict';
+
+      // --- Nav scroll state ---
+      var nav = document.querySelector('.nav');
+      var scrollThreshold = 40;
+
+      function updateNav() {
+        if (window.scrollY > scrollThreshold) {
+          nav.classList.add('scrolled');
+        } else {
+          nav.classList.remove('scrolled');
+        }
+      }
+
+      window.addEventListener('scroll', updateNav, { passive: true });
+      updateNav();
+
+      // --- Mobile menu ---
+      var hamburger = document.querySelector('.nav__hamburger');
+      var mobileMenu = document.querySelector('.nav__mobile');
+      var mobileLinks = mobileMenu.querySelectorAll('a');
+
+      function toggleMenu() {
+        var isOpen = mobileMenu.classList.contains('open');
+        if (isOpen) {
+          mobileMenu.style.opacity = '0';
+          setTimeout(function() {
+            mobileMenu.classList.remove('open');
+          }, 300);
+          hamburger.classList.remove('active');
+          hamburger.setAttribute('aria-expanded', 'false');
+          document.body.style.overflow = '';
+        } else {
+          mobileMenu.classList.add('open');
+          // Force reflow then fade in
+          mobileMenu.offsetHeight;
+          mobileMenu.style.opacity = '1';
+          hamburger.classList.add('active');
+          hamburger.setAttribute('aria-expanded', 'true');
+          document.body.style.overflow = 'hidden';
+        }
+      }
+
+      hamburger.addEventListener('click', toggleMenu);
+
+      for (var i = 0; i < mobileLinks.length; i++) {
+        mobileLinks[i].addEventListener('click', function() {
+          if (mobileMenu.classList.contains('open')) {
+            toggleMenu();
+          }
+        });
+      }
+
+      // Close on Escape
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && mobileMenu.classList.contains('open')) {
+          toggleMenu();
+        }
+      });
+
+      // --- Scroll reveal ---
+      var reveals = document.querySelectorAll('.reveal');
+      var revealObserver = new IntersectionObserver(function(entries) {
+        for (var j = 0; j < entries.length; j++) {
+          if (entries[j].isIntersecting) {
+            entries[j].target.classList.add('visible');
+            revealObserver.unobserve(entries[j].target);
+          }
+        }
+      }, {
+        threshold: 0.1,
+        rootMargin: '0px 0px -40px 0px'
+      });
+
+      for (var k = 0; k < reveals.length; k++) {
+        revealObserver.observe(reveals[k]);
+      }
+
+      // --- Form subject line with name ---
+      var nameInput = document.getElementById('name');
+      var subjectField = document.querySelector('input[name="_subject"]');
+      if (nameInput && subjectField) {
+        nameInput.addEventListener('blur', function() {
+          var val = nameInput.value.trim();
+          if (val) {
+            subjectField.value = 'Inquiry from ' + val + ' via Jingu Dynamics';
+          } else {
+            subjectField.value = 'Inquiry via Jingu Dynamics website';
+          }
+        });
+      }
+    })();
+  </script>
+
+</body>
+</html>
