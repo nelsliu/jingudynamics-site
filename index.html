@@ -27,7 +27,7 @@
        CSS CUSTOM PROPERTIES
        ============================================ */
     :root {
-      --bg-primary: #0a0a0a;
+      --bg-primary: #060a12;
       --bg-secondary: #111111;
       --bg-card: #161616;
       --bg-card-hover: #1c1c1c;
@@ -126,17 +126,13 @@
     }
 
     /* ============================================
-       BACKGROUND TEXTURE — subtle noise overlay
+       WIREFRAME MESH BACKGROUND
        ============================================ */
-    body::before {
-      content: '';
+    #mesh-bg {
       position: fixed;
       inset: 0;
       z-index: 0;
       pointer-events: none;
-      opacity: 0.03;
-      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-      background-size: 256px 256px;
     }
 
     /* ============================================
@@ -153,7 +149,7 @@
     }
 
     .nav.scrolled {
-      background-color: rgba(10, 10, 10, 0.92);
+      background-color: rgba(6, 10, 18, 0.92);
       backdrop-filter: blur(16px);
       -webkit-backdrop-filter: blur(16px);
     }
@@ -262,7 +258,7 @@
       display: none;
       position: fixed;
       inset: 0;
-      background: rgba(10, 10, 10, 0.98);
+      background: rgba(6, 10, 18, 0.98);
       backdrop-filter: blur(24px);
       -webkit-backdrop-filter: blur(24px);
       z-index: 999;
@@ -615,7 +611,7 @@
        PRODUCTS — PING-YOU
        ============================================ */
     .products {
-      background: var(--bg-secondary);
+      background: rgba(22, 22, 22, 0.55);
       position: relative;
       overflow: hidden;
     }
@@ -1029,6 +1025,8 @@
 </head>
 <body>
 
+  <canvas id="mesh-bg" aria-hidden="true"></canvas>
+
   <!-- ============================================
        NAVIGATION
        ============================================ -->
@@ -1415,6 +1413,272 @@
           }
         });
       }
+    })();
+  </script>
+
+  <!-- Wireframe mesh background -->
+  <script>
+    (function() {
+      'use strict';
+
+      var canvas = document.getElementById('mesh-bg');
+      if (!canvas) return;
+      var ctx = canvas.getContext('2d');
+
+      // Grid config — reduced on mobile
+      var isMobile = window.innerWidth < 768;
+      var COLS = isMobile ? 28 : 48;
+      var ROWS = isMobile ? 16 : 24;
+      var SPACING = isMobile ? 32 : 36;
+
+      // Wave parameters
+      var AMPLITUDE = 40;
+      var FREQ_X = 0.08;
+      var FREQ_Y = 0.12;
+      var FREQ_X2 = 0.05;
+      var FREQ_Y2 = 0.07;
+
+      // Camera / perspective
+      var CAMERA_HEIGHT = 220;
+      var FOCAL = 600;
+      var TILT = 0.55; // how tilted the plane is (0 = flat top-down, 1 = edge-on)
+
+      // Scroll state
+      var scrollY = 0;
+      var scrollTarget = 0;
+      var maxScroll = 1;
+
+      // Mouse state (screen coords, smoothed)
+      var mouseX = -9999, mouseY = -9999;
+      var mouseTargetX = -9999, mouseTargetY = -9999;
+      var MOUSE_RADIUS = 180; // px influence radius on screen
+
+      // Canvas sizing
+      var W, H, offsetX, offsetY;
+
+      function resize() {
+        var dpr = Math.min(window.devicePixelRatio || 1, 2);
+        W = window.innerWidth;
+        H = window.innerHeight;
+        canvas.width = W * dpr;
+        canvas.height = H * dpr;
+        canvas.style.width = W + 'px';
+        canvas.style.height = H + 'px';
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+        // Recalculate grid density on resize
+        isMobile = W < 768;
+        COLS = isMobile ? 28 : 48;
+        ROWS = isMobile ? 16 : 24;
+        SPACING = isMobile ? 32 : 36;
+
+        // Center the grid
+        offsetX = W * 0.5;
+        offsetY = H * 0.62;
+
+        maxScroll = Math.max(1, document.documentElement.scrollHeight - H);
+      }
+
+      resize();
+
+      var resizeTimer;
+      window.addEventListener('resize', function() {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(resize, 150);
+      });
+
+      window.addEventListener('scroll', function() {
+        scrollTarget = window.scrollY;
+      }, { passive: true });
+
+      window.addEventListener('mousemove', function(e) {
+        mouseTargetX = e.clientX;
+        mouseTargetY = e.clientY;
+      }, { passive: true });
+
+      window.addEventListener('mouseleave', function() {
+        mouseTargetX = -9999;
+        mouseTargetY = -9999;
+      });
+
+      // Project a 3D point to 2D screen coords
+      function project(x, y, z) {
+        // Apply tilt — rotate around X axis
+        var cosT = Math.cos(TILT);
+        var sinT = Math.sin(TILT);
+        var ry = y * cosT - z * sinT;
+        var rz = y * sinT + z * cosT;
+
+        // Perspective projection
+        var perspective = FOCAL / (FOCAL + rz + CAMERA_HEIGHT);
+        return {
+          sx: offsetX + x * perspective,
+          sy: offsetY + ry * perspective,
+          p: perspective,
+          z: rz
+        };
+      }
+
+      // Time
+      var time = 0;
+
+      function draw() {
+        time += 0.004;
+
+        // Smooth scroll interpolation
+        scrollY += (scrollTarget - scrollY) * 0.08;
+        var scrollPhase = (scrollY / maxScroll) * Math.PI * 3;
+
+        // Smooth mouse interpolation
+        mouseX += (mouseTargetX - mouseX) * 0.1;
+        mouseY += (mouseTargetY - mouseY) * 0.1;
+
+        ctx.clearRect(0, 0, W, H);
+
+        // Build grid of projected points
+        var points = [];
+        var halfCols = COLS * 0.5;
+        var halfRows = ROWS * 0.5;
+
+        for (var row = 0; row < ROWS; row++) {
+          points[row] = [];
+          for (var col = 0; col < COLS; col++) {
+            var gx = (col - halfCols) * SPACING;
+            var gy = (row - halfRows) * SPACING;
+
+            // Primary ridge — abs(sin) creates sharp peaks, centered around zero
+            var ridge = Math.abs(Math.sin(col * 0.06 + time + scrollPhase)) *
+                        Math.abs(Math.cos(row * 0.1 + time * 0.5)) * AMPLITUDE;
+
+            // Height envelope — slow spatial modulation so some peaks tower, some don't
+            var envelope = 0.5 + 0.5 * Math.sin(col * 0.025 + row * 0.03 + time * 0.15);
+            ridge *= envelope;
+
+            // Center ridge around zero so valleys dip negative (keeps highlight math working)
+            ridge -= AMPLITUDE * 0.35;
+
+            // Secondary detail — softer rolling layer
+            var detail = Math.sin(col * 0.05 + row * 0.07 + time * 0.4 + scrollPhase * 0.6) *
+                         AMPLITUDE * 0.2;
+
+            // Tertiary fine texture
+            var texture = Math.cos((col + row) * 0.04 + time * 0.3) * AMPLITUDE * 0.1;
+
+            var gz = ridge + detail + texture;
+
+            // First pass project to get screen position for mouse distance
+            var ptPre = project(gx, gy, gz);
+
+            // Mouse proximity — gentle z-lift near cursor
+            var mdx = ptPre.sx - mouseX;
+            var mdy = ptPre.sy - mouseY;
+            var mDist = Math.sqrt(mdx * mdx + mdy * mdy);
+            var proximity = Math.max(0, 1 - mDist / MOUSE_RADIUS);
+            proximity = proximity * proximity; // ease-in falloff
+            gz += proximity * 30; // upward push (scaled for taller terrain)
+
+            var pt = project(gx, gy, gz);
+            pt.col = col;
+            pt.row = row;
+            pt.gz = gz; // original height for coloring
+            pt.proximity = proximity;
+            points[row][col] = pt;
+          }
+        }
+
+        // Draw lines (connections to right and down neighbors)
+        for (var r = 0; r < ROWS; r++) {
+          for (var c = 0; c < COLS; c++) {
+            var pt = points[r][c];
+
+            // Skip points behind camera or off-screen (with margin)
+            if (pt.p < 0.05) continue;
+
+            // Line to right neighbor
+            if (c < COLS - 1) {
+              var pr = points[r][c + 1];
+              if (pr.p > 0.05) {
+                var avgP = (pt.p + pr.p) * 0.5;
+                var lineProx = Math.max(pt.proximity || 0, pr.proximity || 0);
+                var lineAlpha = Math.pow(avgP, 1.8) * (0.18 + lineProx * 0.25);
+                if (lineAlpha > 0.005) {
+                  ctx.beginPath();
+                  ctx.moveTo(pt.sx, pt.sy);
+                  ctx.lineTo(pr.sx, pr.sy);
+                  ctx.strokeStyle = 'rgba(180,200,230,' + lineAlpha.toFixed(3) + ')';
+                  ctx.lineWidth = 0.5 + lineProx * 0.5;
+                  ctx.stroke();
+                }
+              }
+            }
+
+            // Line to bottom neighbor
+            if (r < ROWS - 1) {
+              var pb = points[r + 1][c];
+              if (pb.p > 0.05) {
+                var avgP2 = (pt.p + pb.p) * 0.5;
+                var lineProx2 = Math.max(pt.proximity || 0, pb.proximity || 0);
+                var lineAlpha2 = Math.pow(avgP2, 1.8) * (0.18 + lineProx2 * 0.25);
+                if (lineAlpha2 > 0.005) {
+                  ctx.beginPath();
+                  ctx.moveTo(pt.sx, pt.sy);
+                  ctx.lineTo(pb.sx, pb.sy);
+                  ctx.strokeStyle = 'rgba(180,200,230,' + lineAlpha2.toFixed(3) + ')';
+                  ctx.lineWidth = 0.5 + lineProx2 * 0.5;
+                  ctx.stroke();
+                }
+              }
+            }
+          }
+        }
+
+        // Draw nodes on top of lines
+        for (var r2 = 0; r2 < ROWS; r2++) {
+          for (var c2 = 0; c2 < COLS; c2++) {
+            var nd = points[r2][c2];
+            if (nd.p < 0.05) continue;
+
+            var nProx = nd.proximity || 0;
+            var nodeAlpha = Math.pow(nd.p, 1.5) * (0.6 + nProx * 0.35);
+            if (nodeAlpha < 0.01) continue;
+
+            var radius = nd.p * (1.8 + nProx * 1.0);
+            if (radius < 0.3) continue;
+
+            // Highlight certain nodes with gold based on wave height
+            var heightNorm = (nd.gz + AMPLITUDE) / (AMPLITUDE * 2);
+            var isHighlight = heightNorm > 0.72;
+
+            if (isHighlight) {
+              // Gold-tinted node
+              var glowR = radius * 3;
+              var grad = ctx.createRadialGradient(nd.sx, nd.sy, 0, nd.sx, nd.sy, glowR);
+              grad.addColorStop(0, 'rgba(212,168,67,' + (nodeAlpha * 0.9).toFixed(3) + ')');
+              grad.addColorStop(0.4, 'rgba(212,168,67,' + (nodeAlpha * 0.2).toFixed(3) + ')');
+              grad.addColorStop(1, 'rgba(212,168,67,0)');
+              ctx.beginPath();
+              ctx.arc(nd.sx, nd.sy, glowR, 0, Math.PI * 2);
+              ctx.fillStyle = grad;
+              ctx.fill();
+
+              ctx.beginPath();
+              ctx.arc(nd.sx, nd.sy, radius * 0.8, 0, Math.PI * 2);
+              ctx.fillStyle = 'rgba(240,200,80,' + (nodeAlpha * 0.95).toFixed(3) + ')';
+              ctx.fill();
+            } else {
+              // Standard blue-white node
+              ctx.beginPath();
+              ctx.arc(nd.sx, nd.sy, radius * 0.6, 0, Math.PI * 2);
+              ctx.fillStyle = 'rgba(200,215,240,' + (nodeAlpha * 0.7).toFixed(3) + ')';
+              ctx.fill();
+            }
+          }
+        }
+
+        requestAnimationFrame(draw);
+      }
+
+      requestAnimationFrame(draw);
     })();
   </script>
 
